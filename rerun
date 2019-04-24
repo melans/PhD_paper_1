@@ -1,0 +1,10 @@
+mv --verbose -f --backup=numbered --target-directory ~/.trash ~/phd/paper_1/{cfsv2,echam4p5}/Sites/*/{0,2,3,4,5}*/* ~/phd/paper_1/{cfsv2,echam4p5}/Sites/*/*.pdf ~/phd/paper_1/{cfsv2,echam4p5}/nohup.out;
+
+cd ~/phd/paper_1/echam4p5/;
+nohup bash spsm.sh &
+
+cd ~/phd/paper_1/cfsv2;
+nohup bash spsm.sh &
+
+cd ~/phd/paper_1;
+jobs

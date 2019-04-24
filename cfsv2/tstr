@@ -1,0 +1,56 @@
+function flds {
+  for var in "$@";do
+    # echo $var ${!var}
+    # echo $m,$L
+    # awk -F, '{print "'$var'\t",NF,"\t'${!var}'"}' <<< ${!var}
+    awk -F, '{print "'$var'\t",NF}' <<< ${!var}
+    # awk -F, '{print "'$var'",NF,"'${!var}'"}' <<< ${!var}
+  done
+}
+
+
+startDT=1958;endDT=2015;
+startDT=1982;endDT=2010;
+m=02;L=4;
+stp0="Sites/08151500/0_temp";rslt1="Sites/08151500/4_calculate/results.1.csv";
+
+for m in `seq -w 01 03`; do
+echo;
+echo $m " ===>>> ";
+t=$(awk '$1>='$startDT'&&$1<'$[startDT+training]'&&$2=='$m'{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+
+q=$(awk -vORS=, '$2=='$m'&&$3==0{print $5}' $rslt1|sed '$ s/,$//');
+q1=$(awk -vORS=, '$2=='$m'&&$3==0&&$4{print $5}' $rslt1|sed '$ s/,$//');
+# q0=$(awk -vORS=, '$2=='$m'&&$3==0&&!$4{print $5}' $rslt1|sed '$ s/,$//');
+
+flds q q1
+
+for L in `seq 0 $Ls`; do
+echo $m","$L  " ... "
+
+r_CV=$(awk -vORS=, '$2=='$m'&&$3=="'$L'"{print $5}' $rslt1|sed '$ s/,$//');
+r1_CV=$(awk -vORS=, '$2=='$m'&&$3=="'$L'"&&$4{print $5}' $rslt1|sed '$ s/,$//');
+# r0_CV=$(awk -vORS=, '$2=='$m'&&$3=="'$L'"&&!$4{print $5}' $rslt1|sed '$ s/,$//');
+
+
+# Rscript -e 'cor=cor(c('$q'),c('$r_CV'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")'
+# Rscript -e 'clim='$t';q=c('$q');r=c('$r_CV');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")'
+# Rscript -e 'cor=cor(c('$q1'),c('$r1_CV'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")'
+# Rscript -e 'clim='$t';q=c('$q1');r=c('$r1_CV');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")'
+# _n=$(awk '$2=='$m'&&$3=="'$L'"{_++}END{print _}' $rslt1|sed '$ s/,$//');
+# _n1=$(awk '$2=='$m'&&$3=="'$L'"&&$4{_++}END{print _}' $rslt1|sed '$ s/,$//');
+# _n0=$(awk '$2=='$m'&&$3=="'$L'"&&!$4{_++}END{print _}' $rslt1|sed '$ s/,$//');
+
+flds r_CV r1_CV
+
+# awk '$2=='$m'&&$3=="0",1' $rslt1;
+# echo;
+# awk '$2=='$m'&&$3=="0"&&$4,1' $rslt1;
+# echo;
+# awk '$2=='$m'&&$3=="'$L'",1' $rslt1;
+# echo;
+# awk '$2=='$m'&&$3=="'$L'"&&$4,1' $rslt1;
+# echo $m","$L " }"
+
+done;
+done;

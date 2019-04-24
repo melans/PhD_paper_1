@@ -1,0 +1,102 @@
+if(!require(hydroGOF))install.packages("hydroGOF");
+# options(warn=-1);
+
+# ((floor(month/3)%%4)+1)
+# 1- W : Winter (Dec-Jan-Feb)
+# 2- S : spring (Mar-Apr-May)
+# 3- H : summer (Jun-July-Aug)
+# 4- F : fall (Sep-Oct-Nov)
+
+
+args <- commandArgs(TRUE);# print (args);# q();
+startDT <- as.numeric(args[1]);
+endDT <- as.numeric(args[2]);
+obs <- args[3];
+mdl1 <- args[4];
+mdl2 <- args[5];
+epsilon <- as.numeric(args[6]);
+doCli <- as.numeric(args[7]);
+training <- (endDT-startDT+1)*2/3;
+
+m2s <- function(m){
+	return(floor(m/3)%%4+1)
+}
+
+obs <- read.table(obs);#, row.names=c("year,month,q"));
+names(obs) <- c('Year','Month','Observed');
+obs <- obs[obs$Year >= startDT & obs$Year <= endDT,];
+obsT <- obs[obs$Year <= startDT+training-1,];		# observed - training
+obsV <- obs[obs$Year > startDT+training-1,];			# observed - validation
+# obsT;
+# obsV;
+
+clims <- data.frame();
+for(season in unique(m2s(obsT$Month)))
+	clims <- rbind(clims,c(season,mean(obsT[m2s(obsT$Month) == season,3])));
+names(clims) <- c('Season','Avg');
+clims;
+
+clim <- data.frame();
+for(month in unique(obsT$Month))
+	clim <- rbind(clim,c(month,mean(obsT[obsT$Month == month,3])));
+names(clim) <- c('Month','Avg');
+clim;
+# m="01";
+L=1;
+
+if(0){
+	print("Month")
+	if(doCli){
+		print("Year,Observed,ECHAM4p5,W1,wECHAM4p5,CFSv2,W2,wCFSv2,Climatology,W3,wClimatology,Combination,RMSE,MSSS");
+	}else{
+		print("Year,Observed,ECHAM4p5,W1,wECHAM4p5,CFSv2,W2,wCFSv2,Combination,R2,MSSS");
+	}
+
+	for(m in 1:12){
+		oT=obsT[obsT$V2==m,3];
+		oV=obsV[obsV$V2==m,3];
+		# print(paste(oT,oV))
+		mm <- sprintf("%02d",m);
+
+		m1 <- paste(mdl1,mm,L,"txt",sep=".");
+		m1 <- read.table(m1,skip=6);#, row.names=c("year,month,q"));
+		m1$V2 <- exp(m1$V2)-epsilon;	#	V2 = value 2 = prediction
+		m1T <- m1[m1$V1 <= startDT+training-1,];		# model 1 - training
+		m1V <- m1[m1$V1 >= startDT+training,];			# model 1 - validation
+
+		m2 <- paste(mdl2,mm,L,"txt",sep=".");
+		m2 <- read.table(m2,skip=6);#, row.names=c("year,month,q"));
+		m2$V2 <- exp(m2$V2)-epsilon;
+		m2T <- m2[m2$V1 <= startDT+training-1,];		# model 2 - training
+		m2V <- m2[m2$V1 >= startDT+training,];			# model 2 - validation
+
+		m1=m1T$V2;
+		m2=m2T$V2;
+		# Validation
+		# print(m1V)
+
+		if(doCli){
+			cl=rep(clim[m,], each=training);
+			d <- (rmse(oT,m1)^-1 + rmse(oT,m2)^-1 + rmse(oT,cl)^-1)^-1;
+			w1 <- d/rmse(oT,m1);
+			w2 <- d/rmse(oT,m2);
+			wcl <- d/rmse(oT,cl);
+			# m1V$V2 <- m1V$V2*w1;
+			# m2V$V2 <- m2V$V2*w2;
+			print(mm);
+			comb <- m1V$V2*w1 + m2V$V2*w2 + cl*wcl;
+			# r2 <- cor(c(oV),c(comb),use="pairwise.complete.obs",method="spearman")^2;
+			# ms <- 1-(sum((oV-comb)^2)/sum((comb-cl)^2))^2
+			# print(paste(m1V$V1, oV, m1V$V2, w1, m1V$V2*w1, m2V$V2, w2, m2V$V2*w2, cl, wcl, cl*wcl, comb, r2, ms, sep=","));
+			print(paste(m1V$V1, oV, m1V$V2, w1, m1V$V2*w1, m2V$V2, w2, m2V$V2*w2, cl, wcl, cl*wcl, comb, sep=","));
+			# print(paste(mm,w1, w2, wcl,sep=","));
+		}else{
+			d <- (rmse(oT,m1)^-1 + rmse(oT,m2)^-1)^-1;
+			w1 <- d/rmse(oT,m1);
+			w2 <- d/rmse(oT,m2);
+			print(mm);
+			print(paste(m1V$V1, oV, m1V$V2, w1, m1V$V2*w1, m2V$V2, w2, m2V$V2*w2, m1V$V2*w1 + m2V$V2*w2,sep=","));
+		}
+
+	}
+}

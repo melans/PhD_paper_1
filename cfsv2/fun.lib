@@ -1,0 +1,599 @@
+# unset count site sites parameter parameters startDT endDT Sites Ls Ms;
+unset count;unset site;unset sites;unset parameter;unset parameters;unset startDT;unset endDT;unset Sites;unset Ls;unset Ms;
+declare -A parameter sites;
+. config.ini;
+# . dev.lib
+
+################################################################################
+# Functions Library
+################################################################################
+
+################################################################################
+echo "Initializing ... ";
+
+################################################################################
+function init {
+  # site=$1;
+  parameter["PRATE"]="Precipitation Rate";
+  parameter["TMP"]="Temperature";
+
+  XYURI="http://waterservices.usgs.gov/nwis/site/?format=rdb&sites=";
+  mapURI="http://water.usgs.gov/wsc/cat/";
+  # flowURI="https://waterservices.usgs.gov/nwis/stat/?format=rdb&statReportType=monthly&statTypeCd=mean&missingData=on&parameterCd=00060&startDT=$[startDT-1]-12&endDT=$[endDT+1]-0$[Ls-1]&sites=";
+  flowURI="https://waterservices.usgs.gov/nwis/stat/?format=rdb&statReportType=monthly&statTypeCd=mean&missingData=on&parameterCd=00060&sites=";
+  gridsURI="http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface"
+
+
+# "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/ngridtable+table-+skipanyNaN+5+-table+.html"
+# "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/ngridtable/5+ncoltable.html?tabopt.N=6&tabopt.1=text&tabopt.2=text&tabopt.3=text&tabopt.4=text&tabopt.5=text&tabopt.6=markNaN&NaNmarker=-9999&tabtype=R.tsv&eol=LF+%28unix%29&filename=datafile.tsv"
+# "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/ngridtable/5+ncoltable.html?tabopt.N=6&tabopt.1=text&tabopt.2=text&tabopt.3=text&tabopt.4=text&tabopt.5=text&tabopt.6=markNaN&NaNmarker=-9999&tabtype=free&eol=LF+%28unix%29&filename=datafile.txt"
+# "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/ngridtable/5+ncoltable.html?tabopt.N=6&tabopt.1=text&tabopt.2=text&tabopt.3=text&tabopt.4=text&tabopt.5=text&tabopt.6=markNaN&NaNmarker=-9999&tabtype=tsv&eol=LF+%28unix%29&filename=datafile.tsv"
+# "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/ngridtable/5+ncoltable.html?tabopt.N=6&tabopt.1=text&tabopt.2=text&tabopt.3=text&tabopt.4=text&tabopt.5=text&tabopt.6=markNaN&NaNmarker=-9999&tabtype=csv&eol=LF+%28unix%29&filename=datafile.csv"
+# "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/ngridtable/5+ncoltable.html?tabopt.N=6&tabopt.1=text&tabopt.2=text&tabopt.3=text&tabopt.4=text&tabopt.5=text&tabopt.6=markNaN&NaNmarker=-9999&tabtype=html&eol=LF+%28unix%29&filename=datafile.html"
+# "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/ngridtable+table-+skipanyNaN+5+-table+.html"
+# "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/[M+S+]average/ngridtable+table-+skipanyNaN+3+-table+.html"
+
+
+  # endDt = 22 Dec 2010
+  # gridsURI2="[M]average/S/(0000%201%20Jan%20$startDT)/(0000%2022%20Dec%20$endDT)/RANGEEDGES"
+
+  M=(Months Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  # First year from which to forecast
+  # FYF=$[$startDT+$training];
+  # echo $FYF;exit
+	mkdir -p $Sites >/dev/null 2>/dev/null;
+  # folders / steps
+}
+################################################################################
+
+################################################################################
+function initsite {
+  path="$Sites/$site";
+  stp0="$path/0_temp";
+  stp1="$path/1_download";
+  stp2="$path/2_format";
+  stp3="$path/3_forecast";
+  stp4="$path/4_calculate";
+  stp5="$path/5_graphs";
+	mkdir -p $stp{0..5} >/dev/null 2>/dev/null;
+  _dnld_ "$XYURI$site" "$stp1/latlon.info";
+  sitename=`awk -F\\\t 'END{print $3}' $stp1/latlon.info`;
+  sitemap=`awk -F\\\t 'END{print $NF}' $stp1/latlon.info`;
+
+  echo;echo -n "==========> Preparing site #$site ($sitename)";
+
+  rslts="$stp4/results";
+  rslt0=$rslts.0.csv;
+  rslt1=$rslts.1.csv;
+  rslt2=$rslts.2.csv;
+
+  cpt_CV="$PWD/$stp3/CV";
+}
+################################################################################
+
+################################################################################
+function enso {
+  MSG "Downloading and processing the ENSO files";
+  # NINO34URI="http://iridl.ldeo.columbia.edu/SOURCES/.Indices/.nino/.EXTENDED/.NINO34/T/(Jan%20$startDT)/(Dec%20$endDT)/RANGEEDGES/gridtable.tsv";
+  NINO34URI="http://iridl.ldeo.columbia.edu/SOURCES/.Indices/.nino/.EXTENDED/.NINO34/gridtable.tsv";
+  # MSG "$NINO34URI => $Sites/nino.0";
+  _dnld_ "$NINO34URI" "$Sites/nino.0";
+  wait;
+  # echo "  wget $NINO34URI -O $Sites/nino.0  ";
+  # (wget "$NINO34URI" -O "$Sites/nino.0" >/dev/null 2>/dev/null);
+  # curl "$NINO34URI" > "$Sites/nino.0";
+  # ls -al $Sites/nino.0
+  # awk 'NR>2{r=FILENAME;t=mktime("2000 "$3*1+1" 1 0 0 0");y=strftime("%Y",t)-40;m=strftime("%m",t);gsub(/1_download/,"0_temp",r);split(r,p,"/0_temp/");split(p[2],p,".");gsub(/0_temp\/\w+./,"0_temp/"p[1]"."m".",r);gsub(/.0$/,".1",r);print y,$2,$1,$4>r}' $f
+  # awk 'NR>2{t=mktime("2000 "$1*1+.5" 1 0 0 0");y=strftime("%Y",t)-40;m=strftime("%m",t);print y,m,($2>.4||$2<-.4),($2>.5||$2<-.5),$2}' $Sites/nino.0 > $Sites/nino.1
+  # awk 'NR>2{t=mktime("2000 "$1*1+.5" 1 0 0 0");y=strftime("%Y",t)-40;m=strftime("%m",t);print y,m,($2>.4||$2<-.4)*sqrt($2*$2)/$2}' Sites/nino.0 > Sites/nino.1
+  awk 'NR>2{t=mktime("3000 "$1*1+.5" 1 0 0 0");y=strftime("%Y",t)-1040;m=strftime("%m",t);print y,m,($2>.5||$2<-.5),$2}' $Sites/nino.0 > $Sites/nino.1;
+}
+################################################################################
+
+################################################################################
+function _dnld_ {
+  counter;
+  url=$1;
+  name=$2;
+  # rm $name;
+  if [[ -z $3 ]]; then
+    (wget $url -qO $name >/dev/null 2>/dev/null);
+  else
+    (wget $url -qO $name >/dev/null 2>/dev/null &);
+    # wget $url -qO $name >/dev/null 2>/dev/null &
+  fi;
+}
+################################################################################
+
+################################################################################
+function download {
+  # site=$1;
+  MSG "Step 1: Downloading ...";
+  MSG "  1) The basic info and the map:";
+  MSG "map => file://$PWD/$stp1/map_$site.jpg";
+  _dnld_ "$mapURI/$sitemap.jpg" "$stp1/map_$site.jpg" _;
+  # dowload_basic_info $site;
+  # echo -n "the data for site #$site ($sitename):";
+  MSG "  2) Streamflow data";
+  _dnld_ "$flowURI$site" "$stp1/flow.0" _;
+
+  # Download CFSv2 prec and st files 1 to 7 months lead times
+  MSG "  3) CFSv2 data for ...";
+  XY_limits="Y/${sites[$site]//,//RANGEEDGES/X/}/RANGEEDGES";
+  for p in "${!parameter[@]}"; do
+    MSG "      ==> ${parameter[$p]} ($p)";
+    MSG " ";
+    # tmpURI=$gridsURI/.$p/$XY_limits;
+    for L in `seq 1 $Ls`; do
+      counter;
+      MSGx "\r        ==> $L month(s) lead time ";
+      # tmpURI=$gridsURI/.$p/$XY_limits;
+      # tmpURI=$gridsURI/.$p/$gridsURI2/$XY_limits;
+      # LtmpURI=$tmpURI/L/$L/VALUES;
+      # echo "$LtmpURI/gridtable.tsv" #"$stp1/$p.$L.0";
+      # echo "$LtmpURI/gridtable.tsv" "$stp1/$p.$L.0";
+      # _dnld_ "$LtmpURI/gridtable.tsv" "$stp1/$p.$L.0";
+      # echo "$gridsURI/.$p/$XY_limits/L/$L/VALUES/[M+]average/gridtable.tsv  >>>  $stp1/$p.$L.0";
+      _dnld_ "$gridsURI/.$p/$XY_limits/L/$L/VALUES/[M+]average/gridtable.tsv" "$stp1/$p.$L.0";
+      # counter;
+    done;
+    # echo "NEXT";
+  done;
+  echo
+  wait;
+  # for f in $stp1/*; do
+  #   awk '!NF||!_[$0]++' $f>_;
+  #   mv _ $f;
+  # done;
+}
+################################################################################
+
+
+################################################################################
+function verify {
+  # check the months
+  # verified=0;
+  # exist_=$(awk 'NR>34{y[$5""$6]++}END{print length(y)}' $stp1/flow.0)
+  exist_=$(awk 'NR>34&&$5>="$startDT"&&($5<="$endDT"||$5=="$(($endDT+1))"&&$6<="$Ls")' $stp1/flow.0|wc -l)
+  supposed_=($[$[endDT-startDT+1]*Ms+Ls])
+  [[ "$exist_" == "$supposed_" ]] && verified=1 || verified=0;
+  # return 0
+}
+################################################################################
+
+################################################################################
+function outliers {
+  # usage: outliers filename rows_to_skip col_to_calc
+  # output: filename.outliers with rows that have outliers according to the request col
+  oFil=$1;
+  oSkp=$2;
+  oCol=$3;
+  oOut=${4:-$1};
+  # echo $oOut;
+  # echo $oFil $oSkp $oCol;
+  # data=`awk -vORS=, 'NR>2{print $4*1}' $oFil|sed 's/,$//g'`;
+  # echo $data;
+  outliers="$(R < outliers.r --no-save --quiet --slave --args $oFil $oSkp $oCol)"
+  outliers=($outliers)
+  outliers="(\$$oCol<${outliers[0]}||\$$oCol>${outliers[1]})"
+  # echo "awk 'NR>\$$oSkp && (\$$oCol<${outliers[0]} || \$$oCol>${outliers[1]})' $oFil"
+
+
+
+  # echo "awk '$outliers[1] $outliers[2]' $oFil"
+  # echo "_ $outliers _";
+  # outliers=(${outliers});
+  # return "$outliers";
+  # echo "${outliers[0]} _ ${outliers[1]}";
+  # echo "awk 'NR>$oSkp && (\$$oCol<=0 || \$$oCol<${outliers[0]} || \$$oCol>${outliers[1]}),1' $oFil>$oFil.outliers"
+  # Rscript -e 'x <- commandArgs(TRUE);\
+  # data <- read.table(x[1], skip = x[2])[, as.numeric(x[3])];\
+  # nums <- fivenum(data, na.rm = TRUE);\
+  # nums[2] - IQR(data) * 1.5;\
+  # nums[4] + IQR(data) * 1.5;'
+}
+################################################################################
+
+################################################################################
+function fix_outliers {
+  echo
+  for f in $stp1/*.?.0;do
+    # the last col `awk 'NR==3{print NF}' $f`
+    outliers $f 2 `awk 'NR==3{print NF}' $f`;
+    echo "$f => `awk '$outliers' $f|wc -l`";
+  done;
+}
+################################################################################
+
+################################################################################
+function varXY {
+  eval `awk -F\\\t 'END{print "site_"$2"=("$6,$5,$NF"); "}' $stp1/latlon.info`;
+  X="site_$site[0]";X=${!X};
+  Y="site_$site[1]";Y=${!Y};
+}
+################################################################################
+
+################################################################################
+function format {
+  MSG "Step 2: Formatting ..."
+  varXY;
+  MSG "  1) (year,month,value)";
+  # awk '$2=="'$site'"{print $5,$6,($7>0?$7:0.001)}' $stp1/flow.0 > $stp0/flow.1;
+  awk '$2=="'$site'"{print $5,($6>9)?$6:"0"$6,$7}' $stp1/flow.0 > $stp0/flow.1;
+  # MSG "  2) Creating predictands (Y.00 -> Y.17) files and log files (Y.00.ln -> Y.17.ln)";
+  MSG "  2) Creating predictands (Y.00 -> Y.$[Ls+12-2]) files";
+  # create Y base file 1st col (years)
+  awk '$1>='$startDT'&&$1<='$endDT'&&$2==1{print $1}' $stp0/flow.1 > $stp0/_Y;
+  # sed -i '$d' $stp0/_Y;
+  # add header for the base file
+  sed -i '1iSTN,\nLAT,\nLON,' $stp0/_Y;
+  # create the months (01-12) files
+  # awk '{print $3>"'$Sites'/'$site'/0_temp/_"sprintf("%02d",$2)}' $stp0/flow.1;
+  # awk '{print log($3+'$small')>"'$stp0'/_"sprintf("%02d.ln",$2)}' $stp0/flow.1;
+  # awk '{print $3>"'$stp0'/_"sprintf("%02d",$2)}' $stp0/flow.1;
+  awk '$1>='$startDT'&&$1<='$[endDT+1]'{print log($3+'$small')>"'$stp0'/_"sprintf("%02d",$2)}' $stp0/flow.1;
+  awk '$1>='$[startDT-1]'&&$1<'$endDT'&&$2=="12"{print log($3+'$small')}' $stp0/flow.1 > $stp0/_00;
+
+  for i in `seq -w $[Ms+1] $[Ms+Ls-1]`; do
+    counter;
+    # if [[ $i -eq 12 ]]; then
+    #   # cp $stp0/_12.ln $stp0/_00.ln;
+    #   cp $stp0/_12 $stp0/_00;
+    # else
+      # cp $stp0/_0$[i-12].ln $stp0/_$[i].ln;
+      cp $stp0/_0$[i-12] $stp0/_$[i];
+    # fi
+
+    # sed -i '$d' $stp0/_0$[i-12].ln;
+    # sed -i '1d' $stp0/_$[i].ln;
+
+    # sed -i '$d' $stp0/_0$[i-12];
+    sed -i '1d' $stp0/_$[i];
+  done;
+  for i in `seq -w 01 $[Ms]`; do
+    sed -i '$d' $stp0/_$i;
+  done;
+  # add the header for months files (00-12 but not Y)
+  # sed -i '1iMM\n'$Y'\n'$X'' $stp0/_??.ln;
+  sed -i '1iMM\n'$Y'\n'$X'' $stp0/_??;
+  # put the month in the header
+  for m in `seq -w 00 $[Ms+Ls-1]`; do
+    counter;
+    # sed -i 's/MM/"'$m'".0/' $stp0/_$m.ln;
+    sed -i 's/MM/'$m'.0/' $stp0/_$m;
+    # awk '{print (NR>3)?log($1):$1}' $stp0/_$m > $stp0/_$m.ln
+    # merge _Y and _mm to form Y.mm
+    # pr -mts" " $stp0/_Y $stp0/_$m.ln > $stp2/Y.$m.ln;
+    # sed -i 's/, /,/' $stp2/Y.$m.ln;
+
+    pr -mts" " $stp0/_Y $stp0/_$m > $stp2/Y.$m;
+    sed -i 's/, /,/' $stp2/Y.$m;
+    # awk '{print $1,(NR>3?log($2):$2)}' $stp2/Y.$m > $stp2/Y.$m.ln
+    # pr -mts" " $stp0/_Y $stp0/_$m.0 > $stp2/Y.$m.0;
+    # sed -i 's/, /,/' $stp2/Y.$m.0;
+  done;
+
+
+  for f in $stp1/*.?.0; do
+    counter;
+    # fix parameters file date format
+    # awk 'NR>2{r=FILENAME;t=mktime("2000 1 "$3*1" 0 0 0");y=strftime("%Y",t)-40;m=strftime("%m",t);gsub(/1_download/,"0_temp",r);split(r,p,"/0_temp/");split(p[2],p,".");gsub(/0_temp\/\w+./,"0_temp/"p[1]"."m".",r);gsub(/.0$/,".1",r);if(y>='$startDT'&&y<='$endDT')print y,$2,$1,$4>r}' $f
+    # awk 'NR>2{r=FILENAME;t=mktime("2000 1 "$3*1" 0 0 0");y=strftime("%Y",t)-40;if(y>='$startDT'&&y<='$endDT'){m=strftime("%m",t);
+    # gsub(/1_download/,"0_temp",r);split(r,p,"/0_temp/");
+    # split(p[2],p,".");gsub(/0_temp\/\w+./,"0_temp/"p[1]"."m".",r);gsub(/.0$/,".1",r);
+    # x=y" "m" "$2" "$1;flds[x]=y" "$2" "$1;file[x]=r;sum[x]+=$4;count[x]++;}}END{n=asorti(sum,sorted);for(i=1;i<=n;i++)print flds[sorted[i]],sum[sorted[i]]/count[sorted[i]]>file[sorted[i]]}' $f
+
+    fx0="${f//$stp1/$stp0}";
+    fx1="${fx0/%.0/.1}";
+      awk 'NR>2{r=FILENAME;t=mktime("3000 1 "$3*1+7" 0 0 0");y=strftime("%Y",t)-1040;m=strftime("%m",t);d=strftime("%d",t);print y,m,d,$2,$1,$4}' $f | \
+      awk '{x=$1" "$2" "$4" "$5;sum[x]+=$NF;count[x]++;}END{n=asorti(sum,sorted);for(i=1;i<=n;i++)print sorted[i],sum[sorted[i]]/count[sorted[i]]}' | \
+      awk '$1>='$startDT'&&$1<='$endDT'{f="'$fx1'";sub(/\./,"."$2".",f);print $1,$3,$4,$5>f}';
+
+    # fx3="${fx2/%.2/.3}";
+    # awk '$1>='$startDT'&&$1<='$endDT',1' $fx2 > $fx3;
+
+    # fx4="${fx//$stp1/$stp0}";
+    # fx4="${fx3/%.2/.3}";
+    # awk '{if(d==0 || d!=$1){Y=$3",";X=$4",";d=$1;p=1}else{Y=Y$2",";X=X$3",";p++}}END{for(i=1;i<=p;i++)printf "%s_%s,","'$p'",i;printf "\n%s\n%s",Y,X}' $fx3;
+    # awk '{if(d==$1){printf "%s ",$4}else{printf "\n%s ",$4;d=$1};}' $f >> $f2
+  done
+
+  # for f in $stp0/*.?.1; do
+  #   # x="y m lat lon"
+  #   fx=${f/%.1/.2};
+  #   awk '{x=$1" "$2" "$6" "$5;sum[x]+=$NF;count[x]++;}END{n=asorti(sum,sorted);for(i=1;i<=n;i++)print sorted[i],sum[sorted[i]]/count[sorted[i]]}' $f > $fx;
+  # done
+  # remove 1st line in Dec file (which is Dec of prev yr)
+  # sed -i '1d' $stp0/*.?.*.12.1;
+  MSG "  3) Creating Partial Predictors (X) files for : ...  ";
+  xp="";
+  for f in $stp0/*.??.?.1; do
+    counter;
+    f2="${f/%.1/.2}";
+    p=`echo $f|cut -d/ -f 4|cut -d. -f 1`;
+    if [ $p != "$xp" ]; then
+      MSG "         X($p)";
+      xp=$p;
+    fi;
+    awk '{if(d==0 || d!=$1){Y=$2",";X=$3",";d=$1;p=1}else{Y=Y$2",";X=X$3",";p++}}END{for(i=1;i<=p;i++)printf "%s_%s,","'$p'",i;printf "\n%s\n%s",Y,X}' $f > $f2
+    awk '{if(d==$1){printf "%s ",$4}else{printf "\n%s ",$4;d=$1};}' $f >> $f2
+  done;
+
+  for m in `seq -w 01 $Ms`; do
+    for L in `seq 1 $Ls`; do
+      counter;
+      mL2=`echo $(printf %02d $[10#$m+L-2])`;
+      pr -mts' ' $stp0/_Y $stp0/*.$m.$L.2 $stp0/_$mL2|sed 's/, /,/g' > $stp2/X.$m.$L;
+    done;
+  done;
+
+  cptLimitsX=`awk -F, 'NR==2||NR==3{max[NR]=$2;min[NR]=$2;for(i=2;i<NF;i++){max[NR]=(max[NR]>$i)?max[NR]:int($i)-($i<0)+1 ; min[NR]=(min[NR]<$i)?min[NR]:int($i)-($i<0)}}END{printf "%d,%d,%d,%d",max[2],min[2],min[3],max[3]}' $stp2/X.01.1`;
+  cptLimitsY=`awk -F, 'NR==2{printf "%d,%d,",int($2)-($2<0)+1,int($2)-($2<0)}NR==3{printf "%d,%d",int($2)-($2<0),int($2)-($2<0)+1}' $stp2/Y.00`;
+
+  # cpt_CV="$PWD/$stp3/CV";
+  eval mkdir -p $cpt_CV/extra >/dev/null 2>/dev/null;
+  cp $stp2/* $cpt_CV/.;
+
+  for m in `seq -w 01 $Ms`; do
+    for L in `seq 1 $Ls`; do
+      counter;
+      mL=`echo "$(printf %02d $[10#$m+$L-1])"`;
+      awk '{print $1}' cpt_CV.cfg|\
+      sed 's%CV%'"$cpt_CV/CV.$m.$L"'%g'|\
+      sed 's%C_V_extra%'"$cpt_CV/extra/CV.$m.$L"'%g'|\
+      sed 's%X_%'"$cpt_CV/X.$m.$L"'%g'|\
+      sed 's%Y_%'"$cpt_CV/Y.$mL"'%g'|\
+      sed 's/cptLimitsX/'${cptLimitsX//,/\\n}'/g'|\
+      sed 's/cptLimitsY/'${cptLimitsY//,/\\n}'/g'|\
+      sed 's/FYF/'$startDT'/g'|\
+      sed 's/Yrs/'$Yrs'/g'\
+      > $cpt_CV/cpt.$m.$L;
+    done;
+  done;
+}
+################################################################################
+
+################################################################################
+function forecasts {
+  # eval mkdir -p $cpt_CV/extra >/dev/null 2>/dev/null;
+  # loop ,years > months > leads
+  # do 1 forecast take the last value from RP add it to end of next X
+  MSG "Step 3: Forecasting ...";
+  MSG "  Forecasting ($startDT to $endDT) ==> (Jan to Dec) ==> (1 to $Ls) months lead time:";
+  echo;
+  for f in $cpt_CV/cpt.??.?; do
+    MSGx "\r=====>$f";
+    forecast $f;
+  done
+}
+################################################################################
+
+################################################################################
+function forecast {
+  cpt=$1;
+  cd $cptd;
+	# xt $cpt;
+  ./$cptf < $cpt > $cpt.out;
+  cd - &>/dev/null;
+}
+################################################################################
+
+
+################################################################################
+function calculate {
+  MSG "Step 4: Calculating ..."
+  MSG "  Calculating Spearman-Rank Corr and MSSS:";
+  # corrected 9-23-17, rslts1 last 2 col : for m=0 => q(m-1) & q(m), for mm => CV & PR
+  # echo "Y	M	L	ENSO	Streamflow_m0_m_CV_RP" > $rslt1;
+  # echo -e "Y\tM\tL\tENSO\t(m0,m)_(CV,RP)" > $rslt1;
+  # echo "Y	M	Lead	P-Y	P-M	Streamflow_CV" > $rslt0;
+
+  echo "Y	M	Lead	P-Y	P-M	Streamflow_CV" > $rslt0;
+
+  for m in `seq -w 01 $Ms`; do
+    # echo " _ $m _ "
+    awk 'NR>3{m='$m';m=m>9?m:"0"m;print $1,m,0,$1,m,exp($2)-'$small'}' $cpt_CV/Y.$m OFS="\t" >> $rslt0;
+    for L in `seq 1 $Ls`; do
+      counter;
+      mL=`echo "$(printf %02d $[10#$m+$L-1])"`;
+      # awk 'NR>6&&$1>'$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";m=m>9?m:"0"m;print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$small'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
+      awk 'NR>6&&$1>'$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$small'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
+    done
+  done
+
+  #
+  #
+  echo -e "Y\tM\tL\tENSO\t(m,m0)_(CV)" > $rslt1;
+  # f==2{m=$2+1;m=(m>9)?m:"0"m;y=$1+(m>12);m=(m>12)?"01":m;q[y" "m]=$3;next}\
+  awk 'FNR==1{++f}f==1{nino[$1" "$2]=$3;next}\
+    f==2{q[$1" "$2*1]=$3;q0[$1" "($2+1)]=$3;next}\
+    f==3&&$1==$1*1&&$1>'$startDT'{\
+      print $4,$5,$3,nino[$4" "$5],$3?$6:q[$4" "$5*1]" "q0[$4" "($5>1?$5*1:13)]\
+    }' $Sites/nino.1 $stp0/flow.1 $rslt0 OFS="\t">> $rslt1;
+  # # start with the output results.0.csv file
+  # # calc=$stp4/CORR_MSSS.csv;
+  # # CORR : SPEARMAN RANK CORRELATION
+  # # MSSS : MEAN SQAURE SKILL SCORE
+  # # E : ENSO
+  # # Y : YES
+  # # N : NO
+  # # _EY : ENSO YES
+  # # _EN : ENSO NO
+  # # echo "M,L,CORR_CV,CORR_RP,CORR_CV_EY,CORR_RP_EY,CORR_CV_EN,CORR_RP_EN,MSSS_CV,MSSS_RP,MSSS_CV_EY,MSSS_RP_EY,MSSS_CV_EN,MSSS_RP_EN,N,N1,N0" > $rslt2;
+  # # echo "M,L,CORR_CV,CORR_RP,CORR_CV_EY,CORR_RP_EY,MSSS_CV,MSSS_RP,MSSS_CV_EY,MSSS_RP_EY,N,N1" > $rslt2;
+  # # echo "M,L,CORR_CV,MSSS_CV,CORR_CV_EY,MSSS_CV_EY,CORR_RP,MSSS_RP,CORR_RP_EY,MSSS_RP_EY,N,N1" > $rslt2;
+  echo "M,L,CORR_CV,MSSS_CV,CORR_CV_EY,MSSS_CV_EY,N,N1" > $rslt2;
+  # echo "M,L,CORR_CV,CORR_CV_EY,N,N1" > $rslt2;
+  echo >> $rslt2;
+  for m in `seq -w 01 $Ms`; do
+    # echo "m = $m">>$tst;
+    # counter;
+    MSG " ";
+    # corrected 9-23-17, between start_date and start+training
+    clim=$(awk '$1<'$startDT'&&$1>='$[2*startDT-endDT-1]'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+
+    q=$(awk -vORS=, '$2=="'$m'"&&$3==0{print $5}' $rslt1|sed '$ s/,$//');
+    # q1=$(awk -vORS=, '$2=="'$m'"&&$3==0&&$4{print $5}' $rslt1|sed '$ s/,$//');
+    # q0=$(awk -vORS=, '$2=="'$m'"&&$3==0&&!$4{print $5}' $rslt1|sed '$ s/,$//');
+
+    for L in `seq 0 $Ls`; do
+      q1=$(awk -vORS=, 'NR==FNR&&$2=="'$m'"&&$3=="'$L'"{enso[$1]++}NR>FNR&&enso[$1]&&$2=="'$m'"&&$3==0&&$4{print $5}' $rslt1 $rslt1|sed '$ s/,$//');
+      counter;
+      MSGx "\r       ==>  ${M[10#$m]}  ==>  $L months lead time ";
+      # if [[ $L == 0 ]]; then L="x"; else L=$L;fi
+      # L=$L
+      echo -n $m","$L
+      echo -n $m","$L >> $rslt2;
+
+      r_CV=$(awk -vORS=, '$2=="'$m'"&&$3=="'$L'"{print $3?$5:$6}' $rslt1|sed '$ s/,$//');
+      # r1_CV=$(awk -vORS=, '$2=="'$m'"&&$3=="'$L'"&&$4{print $3?$5:$6}' $rslt1|sed '$ s/,$//');
+      r1_CV=$(awk -vORS=, 'NR==FNR&&$2=="'$m'"&&$3==0&&$4{enso[$1]++}NR>FNR&&enso[$1]&&$2=="'$m'"&&$3=="'$L'"{print $3?$5:$6}' $rslt1 $rslt1|sed '$ s/,$//');
+
+        # if [[ $L == 0 ]]; then
+        #   r_RP=$r_CV;
+        #   r1_RP=$r1_CV;
+        # else
+        #   r_RP=$(awk -vORS=, '$2=="'$m'"&&$3=="'$L'"{print $6}' $rslt1|sed '$ s/,$//');
+        #   r1_RP=$(awk -vORS=, '$2=="'$m'"&&$3=="'$L'"&&$4{print $6}' $rslt1|sed '$ s/,$//');
+        # fi
+
+        # r0_CV=$(awk -vORS=, '$2=="'$m'"&&$3=="'$L'"&&!$4{print $5}' $rslt1|sed '$ s/,$//');
+        # r0_RP=$(awk -vORS=, '$2=="'$m'"&&$3=="'$L'"&&!$4{print $6}' $rslt1|sed '$ s/,$//');
+# echo;echo "m=$m | L=$L | clim=$clim | q=$q | q1=$q1 | r_cv=$r_CV | r1_CV=$r1_CV";echo;
+        Rscript -e 'cor=cor(c('$q'),c('$r_CV'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")'>>$rslt2;
+        Rscript -e 'clim='$clim';q=c('$q');r=c('$r_CV');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")'>>$rslt2;
+        Rscript -e 'cor=cor(c('$q1'),c('$r1_CV'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")'>>$rslt2;
+        Rscript -e 'clim='$clim';q=c('$q1');r=c('$r1_CV');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")'>>$rslt2;
+        # Rscript -e 'cor=cor(c('$q0'),c('$r0_CV'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")'>>$rslt2;
+        # Rscript -e 'clim='$clim';q=c('$q0');r=c('$r0_CV');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")'>>$rslt2;
+
+        # Rscript -e 'cor=cor(c('$q'),c('$r_RP'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")'>>$rslt2;
+        # Rscript -e 'clim='$clim';q=c('$q');r=c('$r_RP');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")'>>$rslt2;
+        # Rscript -e 'cor=cor(c('$q1'),c('$r1_RP'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")'>>$rslt2;
+        # Rscript -e 'clim='$clim';q=c('$q1');r=c('$r1_RP');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")'>>$rslt2;
+        # Rscript -e 'cor=cor(c('$q0'),c('$r0_RP'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")'>>$rslt2;
+        # Rscript -e 'clim='$clim';q=c('$q0');r=c('$r0_RP');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")'>>$rslt2;
+
+        _n=$(awk '$2=="'$m'"&&$3=="'$L'"{_++}END{print _}' $rslt1|sed '$ s/,$//');
+        _n1=$(awk '$2=="'$m'"&&$3=="'$L'"&&$4{_++}END{print _}' $rslt1|sed '$ s/,$//');
+        # _n0=$(awk '$2=="'$m'"&&$3=="'$L'"&&!$4{_++}END{print _}' $rslt1|sed '$ s/,$//');
+
+      echo ",$_n,$_n1">>$rslt2;
+    done;
+    echo >> $rslt2;
+  done;
+
+
+  # return 0;
+}
+################################################################################
+
+################################################################################
+function graph {
+  MSG "Step 5: Graphing ..."
+
+  Ls=4
+
+  corr=$stp5/$site"_"1_CORR.pdf;
+  msss=$stp5/$site"_"2_MSSS.pdf;
+  corr_ey=$stp5/$site"_"3_CORR_EY.pdf;
+  msss_ey=$stp5/$site"_"4_MSSS_EY.pdf;
+  # corr_en=$stp5/$site"_"5_CORR_EN.pdf;
+  # msss_en=$stp5/$site"_"6_MSSS_EN.pdf;
+
+  # echo $rslt2;
+  # R < script.r "$(realpath $rslt2)" "$(realpath $corr)" $Ls $site `echo "$sitename"|sed 's/\s/_/g'` --save;
+  # echo "$(realpath $rslt2)" "$(realpath $corr)" "$(realpath $msss)" $Ls $site ${sitename// /_};
+  R < graph.r --no-save --quiet --slave --args \
+  "$(realpath $rslt2)" \
+  $Ls $site "${sitename// /_} ), (CFSv2" \
+  "$(realpath $corr)" \
+  "$(realpath $msss)" \
+  "$(realpath $corr_ey)" \
+  "$(realpath $msss_ey)" \
+  >/dev/null 2>/dev/null;
+  pdfunite $stp5/*.pdf $path/$site.CFSv2.pdf;
+
+
+  MSG "Final graph file://$PWD/$path/$site.CFSv2.pdf";
+
+}
+################################################################################
+
+
+
+
+
+
+
+################################################################################
+function MSG {
+  # MSGs
+  counter;
+  # set +x
+  text="$1";delay="$2";if [ -z $delay ]; then delay=".01"; fi
+  echo -en "\n";
+  for i in $(seq 0 $(expr length "${text}")); do printf "${text:$i:1}";sleep ${delay};done;
+}
+################################################################################
+
+################################################################################
+function MSGx {
+  counter;
+  echo -en "$1";
+}
+################################################################################
+
+
+
+
+
+# ################################################################################
+# function DBG {
+#   echo $1 $counter
+# 	# if [[ "$1" ]]; then
+# 	# 	set -x;
+# 	# 	if [[ $1 -lt $counter ]]; then
+# 	# 		set +x;
+# 	# 	fi
+# 	# fi
+# }
+# ################################################################################
+
+
+
+################################################################################
+function counter {
+  count=$[$count+1];
+  echo -en "\r\t\t\t\t\t\t\t\t\t\t\t..... $count";
+  # if [[ $count -eq ${DBG[0]} ]]; then
+  #   set -x;
+  # elif [[ $count -eq ${DBG[1]} ]]; then
+  #   set +x;
+  # fi
+  # if [[ $counter -lt $DBG ]]; then
+  #   set -x;
+  # else
+  #   set +x;
+  # fi
+}
+################################################################################
+
+################################################################################
+function now { date +%Y-%m-%d-%H-%M-%S; }
+################################################################################
+
+################################################################################
+function nowdir { mkdir "$@$(now)"; }
+################################################################################
+
+################################################################################
+# sitepdfs="";
+# corrpdfs="";
+# mssspdfs="";
+################################################################################
+
+
+################################################################################
+function xt { echo " $* ";return; }
+################################################################################

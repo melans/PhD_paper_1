@@ -1,0 +1,5 @@
+xmlns:cpt=http://iri.columbia.edu/CPT/v10/
+cpt:nfields=1
+cpt:field=coefficients, cpt:nrow=1, cpt:ncol=4, cpt:row=station, cpt:col=mode 
+Station	Latitude	Longitude	1	2	3	4
+13.0	32.932977780000002	-99.215388899999994	-8.9003179646250652E-002	-4.5446876167755099E-002	0.87999473653377924	-0.21277019806837921
