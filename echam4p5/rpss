@@ -1,0 +1,42 @@
+# run at
+# 270.4118.190426.000410 Elansary@hpcc2 ~/phd/paper_1/echam4p5/Sites/08194500/3_forecast/CV/extra $
+rpss="boxplot("
+
+Ms=12
+for m in `seq -w 01 $Ms`; do
+  o=$(awk 'NF>1{print exp($2)<1?0:exp($2)}' ../Y.$m)
+  o=$(echo $o|tr ' ' ,)
+  p1="`Rscript -e 'quantile(c('$o'),c(.33))'|tail -1`"
+  p2="`Rscript -e 'quantile(c('$o'),c(.67))'|tail -1`"
+  pr -mts \
+  <(awk -vp1="$p1" -vp2="$p2" 'NF>1{o=exp($2)<1?0:exp($2);print $1,o<=p1?"1 1":o<=p2?"0 1":"0 0"}' ../Y.$m) \
+  <(awk '{P[$1]=$2/100" "P[$1]+$2/100}END{for(y=1958;y<2016;y++)print P[y]}' CV.$m.1.Forecast_Probabilities.txt) |\
+  awk 'BEGIN{print "Year RPS_f RPS_clm RPSS"}{f=($2-$4)^2+($3-$5)^2;c=($2-.33)^2+($3-.67)^2;print $1,f,c,1-f/c}'>../../$m.rpss
+done
+for m in `seq -w 01 $Ms`; do
+  r=$(awk 'NR>1{print $4}' ../../$m.rpss);
+  r=$(echo $r|tr ' ' ,);
+  rpss="$rpss c($r),";
+done
+rpss="$rpss  main='RPSS - ECHAM4p5',xlab='Month',ylab='RPSS', las=2, names=c('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'))";
+
+# awk '{P[$1]=$2/100" "P[$1]+$2/100}END{for(y=1958;y<2016;y++)print y,P[y],1}' CV.01.1.Forecast_Probabilities.txt|les
+#
+#
+# # awk '$1==1984{a[++i]=exp($2)<1?0:exp($2)}END{p1=int(i/3-.5);p2=int(i*2/3-.5);print p1,a[p1],"\n"p2,a[p2]}' CV.01.1.Forecast_Ensembles.txt
+# # 166 0
+# # 332 1.74836
+#
+#
+#
+#
+#
+# awk 'NF>1&&NR==FNR{print a[++i],$1,exp($2)<1?0:exp($2)|"sort -nk3";next}NF>1&&NR>FNR{print i,int(i*.33),int(i*.67)}' ../Y.01 ../Y.01>../../rpss
+# awk 'NF>1&&NR==FNR{a[++i]=exp($2)<1?0:exp($2);print i,$1,a[i]|"sort -nk3";next}NF>1&&NR>FNR{print i,a[int(i*.33)],a[int(i*.67)]}' ../Y.01 ../Y.01>../../rpss
+#
+#
+# # awk 'NR>1{print "p1=\""$1"\";p2=\""$2"\""}'
+# # awk  'NF>1{print exp($2)<1?0:exp($2)}' ../Y.01
+#
+# # awk 'NF>1{print exp($2)<1?0:exp($2)}' ../Y.01|sort -n|awk '{a[NR]=$1}END{print "-vp1=\""a[int(NR*.33)]"\"","-vp2=\""a[int(NR*.67)]"\""}'>../../rpss
+# # |awk '{print i,a[int(i*.33)],a[int(i*.67)]}'  ../Y.01

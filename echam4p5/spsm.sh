@@ -17,10 +17,11 @@ for site in "${!sites[@]}"; do
   # verify;
   # if [[ $verified == 1 ]]; then
 	# 	MSG "Site $sitename is valid, proceeding ...";
-    format;
-    forecasts
-    calculate
+    # format;
+    # forecasts
+    # calculate
     graph;
+    rpss;
   # else
   #   MSG "Site $sitename has missing values, skipping , $exist_ $supposed_";
   # fi;
