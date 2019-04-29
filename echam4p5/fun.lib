@@ -554,7 +554,7 @@ function rpss {
       p2="`Rscript -e 'quantile(c('$o'),c(.67))'|tail -1`";
       pr -mts \
       <(awk -vp1="$p1" -vp2="$p2" 'NF>1{o=exp($2)<1?0:exp($2);print $1,o<=p1?"1 1":o<=p2?"0 1":"0 0"}' $cpt_CV/Y.$m) \
-      <(awk '{P[$1]=$2/100" "P[$1]+$2/100}END{for(y='$startDT';y<'$endDT';y++)print P[y]}' $cpt_CV/extra/CV.$m.$L.Forecast_Probabilities.txt) |\
+      <(awk '{P[$1]=$2/100" "P[$1]+$2/100}END{for(y='$startDT';y<='$endDT';y++)print P[y]}' $cpt_CV/extra/CV.$m.$L.Forecast_Probabilities.txt) |\
       awk 'BEGIN{print "Year RPS_f RPS_clm RPSS"}{f=($2-$4)^2+($3-$5)^2;c=($2-.33)^2+($3-.67)^2;print $1,f,c,1-f/c}'>$stp3/$m.$L.rpss;
 
       r=$(awk 'NR>1{print $4}' $stp3/$m.$L.rpss);
