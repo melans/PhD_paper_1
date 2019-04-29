@@ -12,7 +12,7 @@ init;
 # enso;
 for site in "${!sites[@]}"; do
   initsite;
-   # download;
+  # download;
   # fix_outliers;
   # verify;
   # if [[ $verified == 1 ]]; then
@@ -20,8 +20,8 @@ for site in "${!sites[@]}"; do
     # format;
     # forecasts
     # calculate
-    # graph;
-    rpss;
+    # rpss;
+    graph;
   # else
   #   MSG "Site $sitename has missing values, skipping , $exist_ vs $supposed_";
   # fi;
