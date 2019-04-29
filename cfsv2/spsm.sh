@@ -20,7 +20,7 @@ for site in "${!sites[@]}"; do
     # format;
     # forecasts
     # calculate
-    graph;
+    # graph;
     rpss;
   # else
   #   MSG "Site $sitename has missing values, skipping , $exist_ vs $supposed_";
