@@ -12,16 +12,16 @@ init;
 # enso;
 for site in "${!sites[@]}"; do
   initsite;
-  # download;
+  download;
   # fix_outliers;
   # verify;
   # if [[ $verified == 1 ]]; then
 	# 	MSG "Site $sitename is valid, proceeding ...";
-    # format;
-    # forecasts
-    # calculate
-    # rpss;
+    format;
+    forecasts
+    calculate
     graph;
+    # rpss;
   # else
   #   MSG "Site $sitename has missing values, skipping , $exist_ $supposed_";
   # fi;
