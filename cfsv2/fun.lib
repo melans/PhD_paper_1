@@ -411,7 +411,7 @@ function calculate {
       counter;
       mL=`echo "$(printf %02d $[10#$m+$L-1])"`;
       # awk 'NR>6&&$1>'$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";m=m>9?m:"0"m;print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$small'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
-      awk 'NR>6&&$1>'$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$small'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
+      awk 'NR>6&&$1>='$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$small'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
     done
   done
 
@@ -421,7 +421,7 @@ function calculate {
   # f==2{m=$2+1;m=(m>9)?m:"0"m;y=$1+(m>12);m=(m>12)?"01":m;q[y" "m]=$3;next}\
   awk 'FNR==1{++f}f==1{nino[$1" "$2]=$3;next}\
     f==2{q[$1" "$2*1]=$3;q0[$1" "($2+1)]=$3;next}\
-    f==3&&$1==$1*1&&$1>'$startDT'{\
+    f==3&&$1==$1*1&&$1>='$startDT'{\
       print $4,$5,$3,nino[$4" "$5],$3?$6:q[$4" "$5*1]" "q0[$4" "($5>1?$5*1:13)]\
     }' $Sites/nino.1 $stp0/flow.1 $rslt0 OFS="\t">> $rslt1;
   # # start with the output results.0.csv file
@@ -443,8 +443,9 @@ function calculate {
     # echo "m = $m">>$tst;
     # counter;
     MSG " ";
-    # corrected 9-23-17, between start_date and start+training
-    clim=$(awk '$1<'$startDT'&&$1>='$[2*startDT-endDT-1]'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+    ## corrected 9-23-17, between start_date and start+training
+    # clim=$(awk '$1<'$startDT'&&$1>='$[2*startDT-endDT-1]'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+    clim=$(awk '$1>='$startDT'&&$1<='$endDT'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
 
     q=$(awk -vORS=, '$2=="'$m'"&&$3==0{print $5}' $rslt1|sed '$ s/,$//');
     # q1=$(awk -vORS=, '$2=="'$m'"&&$3==0&&$4{print $5}' $rslt1|sed '$ s/,$//');

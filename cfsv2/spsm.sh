@@ -24,8 +24,8 @@ for site in "${!sites[@]}"; do
   # verify;
   # if [[ $verified == 1 ]]; then
 		# MSG "Site $sitename is valid, $exist_ vs $supposed_ , proceeding ...";
-    format;
-    forecasts
+#    format;
+#    forecasts
     calculate
     # rpss;
     graph;
