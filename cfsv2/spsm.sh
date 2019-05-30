@@ -6,20 +6,27 @@ echo "+===================================================================+";
 ################################################################################
 # unset count;unset sites;unset parameter;unset parameters;unset startDT;unset endDT;unset Sites;unset Ls;unset Ms;
 . fun.lib;
+
+# echo $stpX;
+# f=$stpX/PRATE.01.1;
+# stp1="./Sites/08085500/1_download";
+# echo "${f//$stpX/$stp1}.2";
+# exit;
+
 init;
 # DBG=(1 4);
 ################################################################################
-# enso;
+enso;
 for site in "${!sites[@]}"; do
   initsite;
-  # download;
+  download;
   # fix_outliers;
   # verify;
   # if [[ $verified == 1 ]]; then
 		# MSG "Site $sitename is valid, $exist_ vs $supposed_ , proceeding ...";
-    # format;
-    # forecasts
-    # calculate
+    format;
+    forecasts
+    calculate
     # rpss;
     graph;
   # else

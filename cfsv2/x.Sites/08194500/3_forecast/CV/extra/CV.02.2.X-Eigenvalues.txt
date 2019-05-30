@@ -1,0 +1,4 @@
+xmlns:cpt=http://iri.columbia.edu/CPT/v10/
+cpt:nfields=1
+cpt:field=eigenvalues, cpt:nrow=0, cpt:ncol=3, cpt:row=mode, cpt:col=index 
+Mode	Eigenvalue	% variance	Cum. % variance

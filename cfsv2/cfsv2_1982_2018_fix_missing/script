@@ -1,0 +1,38 @@
+# 1) Take the anomaly of June 2012 as (= June 2012  June climatology)
+# Jun clim
+# awk '{clim[$4" "$5]+=$6;i[$4" "$5]++}END{for(x in clim)print x,clim[x]/i[x]}' PRATE.06.1
+# awk '{clim[$4" "$5]+=$6;i[$4" "$5]++}$1=="2012"{m[$4" "$5]=$6}END{for(x in clim)print x,m[x]-clim[x]/i[x]>FILENAME".anom"}' PRATE.06.1
+# 2) Take the anomaly of August 2012 as (=Aug 2012  Aug climatology)
+for f in *.??.?;do awk '{clim[$4" "$5]+=$6;i[$4" "$5]++}$1=="2012"{m[$4" "$5]=$6}END{for(x in clim)print x,m[x]-clim[x]/i[x]>FILENAME".anom"}' $f;done
+
+
+# 3) Estimate the July 2012 value as = July Climatology + average of (1 and 2 above)
+
+for p in PRATE TMP;do
+  awk 'NR==FNR{f=$4;x[$1" "$2]=$3}NR>FNR{print $1,$2,x[$1" "$2]+$3>f".fix"}' \
+  <(awk '$1!="2012"{clim[$4" "$5]+=$6;i[$4" "$5]++}END{for(x in clim)print x,clim[x]/i[x],FILENAME}' $p.07.1) \
+  <(awk 'NR==FNR{x[$1" "$2]=$3}NR>FNR{print $1,$2,(x[$1" "$2]+$3)/2}' $p.06.1.anom $p.08.1.anom)
+
+  awk 'NR==FNR{f=$4;x[$1" "$2]=$3}NR>FNR{print $1,$2,x[$1" "$2]+$3>f".fix"}' \
+  <(awk '$1!="2012"{clim[$4" "$5]+=$6;i[$4" "$5]++}END{for(x in clim)print x,clim[x]/i[x],FILENAME}' $p.10.4) \
+  <(awk 'NR==FNR{x[$1" "$2]=$3}NR>FNR{print $1,$2,(x[$1" "$2]+$3)/2}' $p.09.4.anom $p.11.4.anom)
+done
+
+# update the original files
+
+
+for f in *.fix;do
+  awk 'NR==FNR{x[$1" "$2]=$3}NR>FNR{if($1==2012)$6=x[$4" "$5];print >FILENAME".fixed"}' $f ${f//.fix/};
+done
+
+
+for f in *.fixed;do
+  cp $f ../cfsv2_1982_2018/"${f//.fixed/}";
+done
+
+
+# awk 'NR==FNR{x[$1" "$2]=$3}NR>FNR{print $1,$2,(x[$1" "$2]+$3)/2}' PRATE.06.1.anom PRATE.08.1.anom
+#
+# awk '{clim[$4" "$5]+=$6;i[$4" "$5]++}END{for(x in clim)print x,clim[x]/i[x]}' PRATE.06.1
+#
+# awk '{clim[$4" "$5]+=$6;i[$4" "$5]++}END{for(x in clim)print x,clim[x]/i[x]}' PRATE.07.1

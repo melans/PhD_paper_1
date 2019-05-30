@@ -1,0 +1,9 @@
+#964.18639.190528.111637 melans@login1.stampede2.tacc.utexas.edu /work/03368/melans/stampede2/cfsv2.newdata/olddata/p $ 
+#awk 'NR>1{t=mktime("1960 "$5*1+1" 1 0 0 0");y=strftime("%Y",t);m=strftime("%m",t);L=$4+.5;print y,m,L,$3,$2,$1>"PRATE."m"."L}' gridtable.tsv
+
+#969.18645.190528.111905 melans@login1.stampede2.tacc.utexas.edu /work/03368/melans/stampede2/cfsv2.newdata/olddata/t $ 
+#awk 'NR>1{t=mktime("1960 "$5*1+1" 1 0 0 0");y=strftime("%Y",t);m=strftime("%m",t);L=$4+.5;print y,m,L,$3,$2,$1>"TMP."m"."L}' gridtable.tsv
+
+#548.5304.190528.120036 Elansary@hpcc2 ~/phd/paper_1/cfsv2/fulldata/all $ 
+#for f in ../old/*;do cat $f ${f//old/new} > ${f//..\/old\//};done
+

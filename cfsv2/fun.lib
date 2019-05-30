@@ -21,7 +21,8 @@ function init {
   mapURI="http://water.usgs.gov/wsc/cat/";
   # flowURI="https://waterservices.usgs.gov/nwis/stat/?format=rdb&statReportType=monthly&statTypeCd=mean&missingData=on&parameterCd=00060&startDT=$[startDT-1]-12&endDT=$[endDT+1]-0$[Ls-1]&sites=";
   flowURI="https://waterservices.usgs.gov/nwis/stat/?format=rdb&statReportType=monthly&statTypeCd=mean&missingData=on&parameterCd=00060&sites=";
-  gridsURI="http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface"
+  # gridsURI="http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface"
+  gridsURI="http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.ENSEMBLE/.FLXF/.surface"
 
 
 # "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CFSv2/.MONTHLY/.FLXF/.surface/.PRATE/Y/31.1/29.8/RANGEEDGES/X/-99.9/-98.3/RANGEEDGES/L/1/VALUES/ngridtable+table-+skipanyNaN+5+-table+.html"
@@ -55,7 +56,7 @@ function initsite {
   stp3="$path/3_forecast";
   stp4="$path/4_calculate";
   stp5="$path/5_graphs";
-	mkdir -p $stp{0..5} >/dev/null 2>/dev/null;
+  mkdir -p $stp{0..5} >/dev/null 2>/dev/null;
   _dnld_ "$XYURI$site" "$stp1/latlon.info";
   sitename=`awk -F\\\t 'END{print $3}' $stp1/latlon.info`;
   sitemap=`awk -F\\\t 'END{print $NF}' $stp1/latlon.info`;
@@ -68,6 +69,11 @@ function initsite {
   rslt2=$rslts.2.csv;
 
   cpt_CV="$PWD/$stp3/CV";
+
+  # convert 28.7/27.4,-100/-98
+  # to 28.7 27.4 -100 -98
+  # then call ${siteXY[3]} 0,1,2,3
+  siteYX=(${sites[$site]//[\/|,]/ });
 }
 ################################################################################
 
@@ -134,7 +140,7 @@ function download {
       # echo "$LtmpURI/gridtable.tsv" "$stp1/$p.$L.0";
       # _dnld_ "$LtmpURI/gridtable.tsv" "$stp1/$p.$L.0";
       # echo "$gridsURI/.$p/$XY_limits/L/$L/VALUES/[M+]average/gridtable.tsv  >>>  $stp1/$p.$L.0";
-      _dnld_ "$gridsURI/.$p/$XY_limits/L/$L/VALUES/[M+]average/gridtable.tsv" "$stp1/$p.$L.0";
+      # _dnld_ "$gridsURI/.$p/$XY_limits/L/$L/VALUES/[M+]average/gridtable.tsv" "$stp1/$p.$L.0";
       # counter;
     done;
     # echo "NEXT";
@@ -273,30 +279,32 @@ function format {
     # sed -i 's/, /,/' $stp2/Y.$m.0;
   done;
 
-
-  for f in $stp1/*.?.0; do
-    counter;
-    # fix parameters file date format
-    # awk 'NR>2{r=FILENAME;t=mktime("2000 1 "$3*1" 0 0 0");y=strftime("%Y",t)-40;m=strftime("%m",t);gsub(/1_download/,"0_temp",r);split(r,p,"/0_temp/");split(p[2],p,".");gsub(/0_temp\/\w+./,"0_temp/"p[1]"."m".",r);gsub(/.0$/,".1",r);if(y>='$startDT'&&y<='$endDT')print y,$2,$1,$4>r}' $f
-    # awk 'NR>2{r=FILENAME;t=mktime("2000 1 "$3*1" 0 0 0");y=strftime("%Y",t)-40;if(y>='$startDT'&&y<='$endDT'){m=strftime("%m",t);
-    # gsub(/1_download/,"0_temp",r);split(r,p,"/0_temp/");
-    # split(p[2],p,".");gsub(/0_temp\/\w+./,"0_temp/"p[1]"."m".",r);gsub(/.0$/,".1",r);
-    # x=y" "m" "$2" "$1;flds[x]=y" "$2" "$1;file[x]=r;sum[x]+=$4;count[x]++;}}END{n=asorti(sum,sorted);for(i=1;i<=n;i++)print flds[sorted[i]],sum[sorted[i]]/count[sorted[i]]>file[sorted[i]]}' $f
-
-    fx0="${f//$stp1/$stp0}";
-    fx1="${fx0/%.0/.1}";
-      awk 'NR>2{r=FILENAME;t=mktime("3000 1 "$3*1+7" 0 0 0");y=strftime("%Y",t)-1040;m=strftime("%m",t);d=strftime("%d",t);print y,m,d,$2,$1,$4}' $f | \
-      awk '{x=$1" "$2" "$4" "$5;sum[x]+=$NF;count[x]++;}END{n=asorti(sum,sorted);for(i=1;i<=n;i++)print sorted[i],sum[sorted[i]]/count[sorted[i]]}' | \
-      awk '$1>='$startDT'&&$1<='$endDT'{f="'$fx1'";sub(/\./,"."$2".",f);print $1,$3,$4,$5>f}';
-
-    # fx3="${fx2/%.2/.3}";
-    # awk '$1>='$startDT'&&$1<='$endDT',1' $fx2 > $fx3;
-
-    # fx4="${fx//$stp1/$stp0}";
-    # fx4="${fx3/%.2/.3}";
-    # awk '{if(d==0 || d!=$1){Y=$3",";X=$4",";d=$1;p=1}else{Y=Y$2",";X=X$3",";p++}}END{for(i=1;i<=p;i++)printf "%s_%s,","'$p'",i;printf "\n%s\n%s",Y,X}' $fx3;
-    # awk '{if(d==$1){printf "%s ",$4}else{printf "\n%s ",$4;d=$1};}' $f >> $f2
-  done
+# this part is replaced with cfsv2_1982_2018
+  #
+  # for f in $stp1/*.?.0; do
+  #   counter;
+  #   # fix parameters file date format
+  #   # awk 'NR>2{r=FILENAME;t=mktime("2000 1 "$3*1" 0 0 0");y=strftime("%Y",t)-40;m=strftime("%m",t);gsub(/1_download/,"0_temp",r);split(r,p,"/0_temp/");split(p[2],p,".");gsub(/0_temp\/\w+./,"0_temp/"p[1]"."m".",r);gsub(/.0$/,".1",r);if(y>='$startDT'&&y<='$endDT')print y,$2,$1,$4>r}' $f
+  #   # awk 'NR>2{r=FILENAME;t=mktime("2000 1 "$3*1" 0 0 0");y=strftime("%Y",t)-40;if(y>='$startDT'&&y<='$endDT'){m=strftime("%m",t);
+  #   # gsub(/1_download/,"0_temp",r);split(r,p,"/0_temp/");
+  #   # split(p[2],p,".");gsub(/0_temp\/\w+./,"0_temp/"p[1]"."m".",r);gsub(/.0$/,".1",r);
+  #   # x=y" "m" "$2" "$1;flds[x]=y" "$2" "$1;file[x]=r;sum[x]+=$4;count[x]++;}}END{n=asorti(sum,sorted);for(i=1;i<=n;i++)print flds[sorted[i]],sum[sorted[i]]/count[sorted[i]]>file[sorted[i]]}' $f
+  #
+  #   fx0="${f//$stp1/$stp0}";
+  #   fx1="${fx0/%.0/.1}";
+  #     awk 'NR>2{r=FILENAME;t=mktime("3000 1 "$3*1+7" 0 0 0");y=strftime("%Y",t)-1040;m=strftime("%m",t);d=strftime("%d",t);print y,m,d,$2,$1,$4}' $f | \
+  #     awk '{x=$1" "$2" "$4" "$5;sum[x]+=$NF;count[x]++;}END{n=asorti(sum,sorted);for(i=1;i<=n;i++)print sorted[i],sum[sorted[i]]/count[sorted[i]]}' | \
+  #     awk '$1>='$startDT'&&$1<='$endDT'{f="'$fx1'";sub(/\./,"."$2".",f);print $1,$3,$4,$5>f}';
+  #
+  #   # fx3="${fx2/%.2/.3}";
+  #   # awk '$1>='$startDT'&&$1<='$endDT',1' $fx2 > $fx3;
+  #
+  #   # fx4="${fx//$stp1/$stp0}";
+  #   # fx4="${fx3/%.2/.3}";
+  #   # awk '{if(d==0 || d!=$1){Y=$3",";X=$4",";d=$1;p=1}else{Y=Y$2",";X=X$3",";p++}}END{for(i=1;i<=p;i++)printf "%s_%s,","'$p'",i;printf "\n%s\n%s",Y,X}' $fx3;
+  #   # awk '{if(d==$1){printf "%s ",$4}else{printf "\n%s ",$4;d=$1};}' $f >> $f2
+  # done
+#
 
   # for f in $stp0/*.?.1; do
   #   # x="y m lat lon"
@@ -307,16 +315,22 @@ function format {
   # sed -i '1d' $stp0/*.?.*.12.1;
   MSG "  3) Creating Partial Predictors (X) files for : ...  ";
   xp="";
-  for f in $stp0/*.??.?.1; do
+  # for f in $stp0/*.??.?.1; do
+  for f in $stpX/*; do
     counter;
-    f2="${f/%.1/.2}";
-    p=`echo $f|cut -d/ -f 4|cut -d. -f 1`;
+    # f2="${f/%.1/.2}";
+    # p=`echo $f|cut -d/ -f 4|cut -d. -f 1`;
+    f2="${f//$stpX/$stp0}.2";
+    p=`echo $f|cut -d/ -f 3|cut -d. -f 1`;
     if [ $p != "$xp" ]; then
       MSG "         X($p)";
       xp=$p;
     fi;
-    awk '{if(d==0 || d!=$1){Y=$2",";X=$3",";d=$1;p=1}else{Y=Y$2",";X=X$3",";p++}}END{for(i=1;i<=p;i++)printf "%s_%s,","'$p'",i;printf "\n%s\n%s",Y,X}' $f > $f2
-    awk '{if(d==$1){printf "%s ",$4}else{printf "\n%s ",$4;d=$1};}' $f >> $f2
+    # awk '{if(d==0 || d!=$1){Y=$2",";X=$3",";d=$1;p=1}else{Y=Y$2",";X=X$3",";p++}}END{for(i=1;i<=p;i++)printf "%s_%s,","'$p'",i;printf "\n%s\n%s",Y,X}' $f > $f2
+    # echo;echo '$4<='"${siteYX[0]}"'&&$4>='"${siteYX[1]}"'&&$5>='"${siteYX[2]}"'&&$5<='"${siteYX[3]}";exit;
+    awk '$4<='"${siteYX[0]}"'&&$4>='"${siteYX[1]}"'&&$5>='"${siteYX[2]}"'&&$5<='"${siteYX[3]}"'&&$1>='$startDT'&&$1<='$endDT'{if(d==0 || d!=$1){Y=$4",";X=$5",";d=$1;p=1}else{Y=Y$4",";X=X$5",";p++}}END{for(i=1;i<=p;i++)printf "%s_%s,","'$p'",i;printf "\n%s\n%s",Y,X}' $f > $f2
+    # awk '{if(d==$1){printf "%s ",$4}else{printf "\n%s ",$4;d=$1};}' $f >> $f2
+    awk '$4<='"${siteYX[0]}"'&&$4>='"${siteYX[1]}"'&&$5>='"${siteYX[2]}"'&&$5<='"${siteYX[3]}"'&&$1>='$startDT'&&$1<='$endDT'{if(d==$1){printf "%s ",$6}else{printf "\n%s ",$6;d=$1};}' $f >> $f2
   done;
 
   for m in `seq -w 01 $Ms`; do
