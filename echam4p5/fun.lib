@@ -419,7 +419,7 @@ function calculate {
   echo -e "Y\tM\tL\tENSO\t(m,m0)_(CV)" > $rslt1;
   # f==2{m=$2+1;m=(m>9)?m:"0"m;y=$1+(m>12);m=(m>12)?"01":m;q[y" "m]=$3;next}\
   awk 'FNR==1{++f}f==1{nino[$1" "$2]=$3;next}\
-    f==2{q[$1" "$2*1]=$3;q0[$1" "($2+1)]=$3;next}\
+    f==2{q[$1" "$2*1]=$3;q0[$1+($2>11)" "$2+1]=$3;next}\
     f==3&&$1==$1*1&&$1>='$startDT'{\
       print $4,$5,$3,nino[$4" "$5],$3?$6:q[$4" "$5*1]" "q0[$4" "($5>1?$5*1:13)]\
     }' $Sites/nino.1 $stp0/flow.1 $rslt0 OFS="\t">> $rslt1;
