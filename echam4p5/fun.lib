@@ -445,7 +445,8 @@ function calculate {
     MSG " ";
     ## corrected 9-23-17, between start_date and start+training
     # clim=$(awk '$1<'$startDT'&&$1>='$[2*startDT-endDT-1]'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
-    clim=$(awk '$1>='$startDT'&&$1<='$endDT'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+    # clim=$(awk '$1>='$startDT'&&$1<='$endDT'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+    clim=$(awk '$1>='$startDT'&&$1<=2011&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
 
     q=$(awk -vORS=, '$2=="'$m'"&&$3==0{print $5}' $rslt1|sed '$ s/,$//');
     # q1=$(awk -vORS=, '$2=="'$m'"&&$3==0&&$4{print $5}' $rslt1|sed '$ s/,$//');
