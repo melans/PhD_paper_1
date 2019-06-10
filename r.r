@@ -15,7 +15,7 @@ obs <- args[3];
 mdl1 <- args[4];
 mdl2 <- args[5];
 epsilon <- as.numeric(args[6]);
-doCli <- as.numeric(args[7]);
+doClim <- as.numeric(args[7]);
 trn <- (endDT-startDT+1)*2/3;
 vld <- (endDT-startDT+1)*1/3;
 # print(endDT-vld)
@@ -76,13 +76,13 @@ if(0){
 	# print(model1[model1$Season==1,]);
 
 	print("Season")
-	if(doCli){
+	if(doClim){
 		print("Year,Observed,ECHAM4p5,RMSE1,W1,wECHAM4p5,CFSv2,RMSE2,W2,wCFSv2,Climatology,RMSE3,W3,wClimatology,Combination,R2,MSSS");
 	# }else{
 	# 	print("Year,Observed,ECHAM4p5,W1,wECHAM4p5,CFSv2,W2,wCFSv2,Combination,R2,MSSS");
 	}
 	for(s in 1:4){
-		if(doCli){
+		if(doClim){
 			oT <- obsT[obsT$Season==s,]$Observed;
 			oV <- obsV[obsV$Season==s,]$Observed;
 
@@ -128,7 +128,7 @@ if(0){
 		names(clim) <- c('Month','Avg');
 
 		print("Season")
-		if(doCli){
+		if(doClim){
 			print("Year,Observed,ECHAM4p5,W1,wECHAM4p5,CFSv2,W2,wCFSv2,Climatology,W3,wClimatology,Combination,R2,MSSS");
 		}else{
 			print("Year,Observed,ECHAM4p5,W1,wECHAM4p5,CFSv2,W2,wCFSv2,Combination,R2,MSSS");
@@ -139,7 +139,7 @@ if(0){
 			oV <- obsV[obsV$Season==s,]$Observed;
 
 			# print(model1T[model1T$Season==s,]);
-			if(doCli){
+			if(doClim){
 				clT=rep(clim[s,2], each=trn*3);
 				clV=rep(clim[s,2], each=vld*3);
 				m1T <- model1T[model1T$Season==s,];
@@ -179,7 +179,7 @@ if(0){
 
 if(1){
 	print("Month")
-	if(doCli){
+	if(doClim){
 		print("Year,Observed,ECHAM4p5,W1,wECHAM4p5,CFSv2,W2,wCFSv2,Climatology,W3,wClimatology,Combination,R2,MSSS");
 	}else{
 		print("Year,Observed,ECHAM4p5,W1,wECHAM4p5,CFSv2,W2,wCFSv2,Combination,R2,MSSS");
@@ -212,7 +212,7 @@ if(1){
 		# print(oT$Observed);
 		# Validation
 
-		if(doCli){
+		if(doClim){
 			clT=rep(clim[m,2], each=trn);
 			clV=rep(clim[m,2], each=vld);
 			# print(cl)

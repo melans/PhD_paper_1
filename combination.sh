@@ -4,7 +4,7 @@
 
 . fun.lib;
 site="08151500";
-doCli="1";  # consider climatology 1/0
+doClim="1";  # consider climatology 1/0
 init;
 m1;
 
@@ -35,8 +35,8 @@ R < r.r --no-save --quiet --slave --args \
   "$mdl1" \
   "$mdl2" \
   "$epsilon" \
-  "$doCli"  | sed 's/\(\[.*\]\|"\)//g'|awk -F, '{print (NF>1)$0}'|sed 's/^1/,/'|sed 's/^0//'|sed 's/,/\t/g' > rslts.csv
-  # "$doCli"  | sed 's/\(\[.*\]\|"\)//g'|tr -d ' '|awk -F, '{print (NF>1)$0}'|sed 's/^1/,/'|sed 's/^0//'|sed 's/,/\t/g' > rslts.csv
+  "$doClim"  | sed 's/\(\[.*\]\|"\)//g'|awk -F, '{print (NF>1)$0}'|sed 's/^1/,/'|sed 's/^0//'|sed 's/,/\t/g' > rslts.csv
+  # "$doClim"  | sed 's/\(\[.*\]\|"\)//g'|tr -d ' '|awk -F, '{print (NF>1)$0}'|sed 's/^1/,/'|sed 's/^0//'|sed 's/,/\t/g' > rslts.csv
 
   # |awk -F, '{print NF>1?" ":""$0}'
   # >/dev/null 2>/dev/null;

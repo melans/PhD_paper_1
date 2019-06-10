@@ -235,10 +235,10 @@ function format {
   sed -i '1iSTN,\nLAT,\nLON,' $stp0/_Y;
   # create the months (01-12) files
   # awk '{print $3>"'$Sites'/'$site'/0_temp/_"sprintf("%02d",$2)}' $stp0/flow.1;
-  # awk '{print log($3+'$small')>"'$stp0'/_"sprintf("%02d.ln",$2)}' $stp0/flow.1;
+  # awk '{print log($3+'$epsilon')>"'$stp0'/_"sprintf("%02d.ln",$2)}' $stp0/flow.1;
   # awk '{print $3>"'$stp0'/_"sprintf("%02d",$2)}' $stp0/flow.1;
-  awk '$1>='$startDT'&&$1<='$[endDT+1]'{print log($3+'$small')>"'$stp0'/_"sprintf("%02d",$2)}' $stp0/flow.1;
-  awk '$1>='$[startDT-1]'&&$1<'$endDT'&&$2=="12"{print log($3+'$small')}' $stp0/flow.1 > $stp0/_00;
+  awk '$1>='$startDT'&&$1<='$[endDT+1]'{print log($3+'$epsilon')>"'$stp0'/_"sprintf("%02d",$2)}' $stp0/flow.1;
+  awk '$1>='$[startDT-1]'&&$1<'$endDT'&&$2=="12"{print log($3+'$epsilon')}' $stp0/flow.1 > $stp0/_00;
 
   for i in `seq -w $[Ms+1] $[Ms+Ls-1]`; do
     counter;
@@ -406,12 +406,12 @@ function calculate {
 
   for m in `seq -w 01 $Ms`; do
     # echo " _ $m _ "
-    awk 'NR>3{m='$m';m=m>9?m:"0"m;print $1,m,0,$1,m,exp($2)-'$small'}' $cpt_CV/Y.$m OFS="\t" >> $rslt0;
+    awk 'NR>3{m='$m';m=m>9?m:"0"m;print $1,m,0,$1,m,exp($2)-'$epsilon'}' $cpt_CV/Y.$m OFS="\t" >> $rslt0;
     for L in `seq 1 $Ls`; do
       counter;
       mL=`echo "$(printf %02d $[10#$m+$L-1])"`;
-      # awk 'NR>6&&$1>'$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";m=m>9?m:"0"m;print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$small'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
-      awk 'NR>6&&$1>='$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$small'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
+      # awk 'NR>6&&$1>'$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";m=m>9?m:"0"m;print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$epsilon'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
+      awk 'NR>6&&$1>='$startDT'{mL='$mL'%12;mL=mL>9?mL:"0"mL;m="'$m'";print $1,m,'$L',$1+('$mL'>12),(mL*1>0?mL:12),exp($2)-'$epsilon'}' $cpt_CV/CV.$m.$L.txt OFS="\t" >> $rslt0;
     done
   done
 
@@ -445,8 +445,8 @@ function calculate {
     MSG " ";
     ## corrected 9-23-17, between start_date and start+training
     # clim=$(awk '$1<'$startDT'&&$1>='$[2*startDT-endDT-1]'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
-    # clim=$(awk '$1>='$startDT'&&$1<='$endDT'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
-    clim=$(awk '$1>='$startDT'&&$1<=2011&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+    # clim=$(awk '$1>='$startDT'&&$1<=2011&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+    clim=$(awk '$1>='$startDT'&&$1<='$endDT'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
 
     q=$(awk -vORS=, '$2=="'$m'"&&$3==0{print $5}' $rslt1|sed '$ s/,$//');
     # q1=$(awk -vORS=, '$2=="'$m'"&&$3==0&&$4{print $5}' $rslt1|sed '$ s/,$//');
@@ -533,11 +533,11 @@ function graph {
   for L in `seq 1 $Ls`; do
     rpss="pdf(\"$stp5/$site.RPSS.$L.pdf\"); boxplot(";
     for m in `seq -w 01 $Ms`; do
-      o=$(awk 'NF>1{print exp($2)<1?0:exp($2)}' $cpt_CV/Y.$m)|tr ' ' ,;
+      o=$(awk 'NF>1{print (exp($2)-'$epsilon')<1?0:(exp($2)-'$epsilon')}' $cpt_CV/Y.$m)|tr ' ' ,;
       p1="`Rscript -e 'quantile(c('$o'),c(.33))'|tail -1`";
       p2="`Rscript -e 'quantile(c('$o'),c(.67))'|tail -1`";
       pr -mts \
-      <(awk -vp1="$p1" -vp2="$p2" 'NF>1{o=exp($2)<1?0:exp($2);print $1,o<=p1?"1 1":o<=p2?"0 1":"0 0"}' $cpt_CV/Y.$m) \
+      <(awk -vp1="$p1" -vp2="$p2" 'NF>1{o=(exp($2)-'$epsilon')<1?0:(exp($2)-'$epsilon');print $1,o<=p1?"1 1":o<=p2?"0 1":"0 0"}' $cpt_CV/Y.$m) \
       <(awk '{P[$1]=$2/100" "P[$1]+$2/100}END{for(y='$startDT';y<='$endDT';y++)print P[y]}' $cpt_CV/extra/CV.$m.$L.Forecast_Probabilities.txt) |\
       awk 'BEGIN{print "Year RPS_f RPS_clm RPSS"}{f=($2-$4)^2+($3-$5)^2;c=($2-.33)^2+($3-.67)^2;print $1,f,c,1-f/c}'>$stp3/$m.$L.rpss;
 

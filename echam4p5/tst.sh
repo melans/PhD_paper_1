@@ -1,7 +1,7 @@
-startDT="1983";
-endDT="2009";
+startDT="1982";
+endDT="2016";
 # training="29";  # Length of initial training period (suggested value 29):
-training="$[((endDT-startDT)+1)/2]";  # Length of initial training period (suggested value 29):
+# training="$[((endDT-startDT)+1)/2]";  # Length of initial training period (suggested value 29):
 Sites="Sites";  #  data folder
 Ls=4;    # lead times
 Ms=12;  # months
@@ -31,12 +31,15 @@ awk '$2=='$m'&&$3=='$L'{print $3?$5:$6}' $rslt1|wc -l;
 awk '$2=='$m'&&$3==0&&$4{print $5}' $rslt1|wc -l;
 awk '$2=='$m'&&$3=='$L'&&$4{print $3?$5:$6}' $rslt1|wc -l;
 
+# clim=$(awk '$1>='$startDT'&&$1<=2011&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+clim=$(awk '$1>='$startDT'&&$1<='$endDT'&&$2=="'$m'"{y++;m+=$3}END{print m/y}' $stp0/flow.1);
+
 q=$(awk -vORS=, '$2=='$m'&&$3==0{print $5}' $rslt1|sed '$ s/,$//');
 r_CV=$(awk -vORS=, '$2=='$m'&&$3=='$L'{print $3?$5:$6}' $rslt1|sed '$ s/,$//');
 q1=$(awk -vORS=, '$2=='$m'&&$3==0&&$4{print $5}' $rslt1|sed '$ s/,$//');
 r1_CV=$(awk -vORS=, '$2=='$m'&&$3=='$L'&&$4{print $3?$5:$6}' $rslt1|sed '$ s/,$//');
 
-echo $q $r_CV $q1 $r1_CV;
+echo $clim $q $r_CV $q1 $r1_CV;
 
 Rscript -e 'cor=cor(c('$q'),c('$r_CV'),use="pairwise.complete.obs",method="spearman");cat(",",ifelse(cor>0,cor,0),sep="")';
 Rscript -e 'clim='$clim';q=c('$q');r=c('$r_CV');msss=1-(sum((q-r)^2)/sum((q-clim)^2));cat(",",ifelse(msss>0,msss,0),sep="")';

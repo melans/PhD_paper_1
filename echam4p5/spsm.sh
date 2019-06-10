@@ -17,8 +17,8 @@ for site in "${!sites[@]}"; do
   # verify;
   # if [[ $verified == 1 ]]; then
 	# 	MSG "Site $sitename is valid, proceeding ...";
-#    format;
-#    forecasts
+    # format;
+    # forecasts
     calculate
     graph;
     # rpss;

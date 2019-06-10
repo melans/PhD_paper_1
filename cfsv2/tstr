@@ -10,7 +10,7 @@ function flds {
 
 
 startDT=1958;endDT=2015;
-startDT=1982;endDT=2010;
+startDT=1982;endDT=2016;
 m=02;L=4;
 stp0="Sites/08151500/0_temp";rslt1="Sites/08151500/4_calculate/results.1.csv";
 
