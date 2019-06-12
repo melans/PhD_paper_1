@@ -57,27 +57,43 @@ function graph {
   #
   # # RPSS Calculations and Graphs
   for L in `seq 1 $Ls`; do
-    rpss="pdf(\"$graphs/$site.RPSS.$L.pdf\"); boxplot(";
+    rpss="pdf('$graphs/$site"_5_"RPSS_$L.pdf'); ";
+    # CFSv2
+    rpss="$rpss boxplot(";
+    # for model in "cfsv2" "echam4p5";do
     for m in `seq -w 01 $Ms`; do
-      for model in "cfsv2" "echam4p5";do
-        stp3=$model/Sites/$site/3_forecast
-        o=$(awk 'NF>1{print (exp($2)-'$epsilon')<1?0:(exp($2)-'$epsilon')}' $stp3/CV/Y.$m)|tr ' ' ,;
-        # p1="`Rscript -e 'quantile(c('$o'),c(.33))'|tail -1`";
-        # p2="`Rscript -e 'quantile(c('$o'),c(.67))'|tail -1`";
-        # pr -mts \
-        # <(awk -vp1="$p1" -vp2="$p2" 'NF>1{o=(exp($2)-'$epsilon')<1?0:(exp($2)-'$epsilon');print $1,o<=p1?"1 1":o<=p2?"0 1":"0 0"}' $cpt_CV/Y.$m) \
-        # <(awk '{P[$1]=$2/100" "P[$1]+$2/100}END{for(y='$startDT';y<='$endDT';y++)print P[y]}' $cpt_CV/extra/CV.$m.$L.Forecast_Probabilities.txt) |\
-        # awk 'BEGIN{print "Year RPS_f RPS_clm RPSS"}{f=($2-$4)^2+($3-$5)^2;c=($2-.33)^2+($3-.67)^2;print $1,f,c,1-f/c}'>$graphs/$m.$L.rpss;
-
-        r=$(awk 'NR>1{print $4}' $stp3/$m.$L.rpss);
-        r=$(echo $r|tr ' ' ,);
-        rpss="$rpss c($r),";
-      done;
+      r=$(awk 'NR>1{printf $4","}' cfsv2/Sites/$site/3_forecast/$m.$L.rpss|sed 's/,$//g');
+      rpss="$rpss c($r), ";
     done;
+    rpss="$rpss xaxt='n',yaxt='n',col='#0000ff08',border=c('blue') ,boxwex=0.2,at= 1:12-.15,ylim=c(-3,1));"
 
-    rpss="$rpss  main='Site #"$site" "${sitename// /_}"\nRPSS - $ModelName ($L month lead time)',xlab='Month',ylab='RPSS', las=2, names=c('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'));abline(0,0,col=2,lty=2,lwd=1);";
+    # ECHAM4.5
+    rpss="$rpss boxplot(";
+    # for model in "cfsv2" "echam4p5";do
+    for m in `seq -w 01 $Ms`; do
+      r=$(awk 'NR>1{printf $4","}' echam4p5/Sites/$site/3_forecast/$m.$L.rpss|sed 's/,$//g');
+      rpss="$rpss c($r), ";
+    done;
+    # rpss="$rpss main='Site #"$site" "${sitename// /_}"\nRPSS - $ModelName ($L month lead time)',xlab='Month',ylab='RPSS', las=2, names=c('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'));abline(0,0,col=2,lty=2,lwd=1);";
+    rpss="$rpss main='Site #"$site" ("$sitename")\nRPSS - ($L month lead time)',xlab='Month',ylab='RPSS',las=2,col='#ff000008',border=c('red'), names=c('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'), boxwex=0.2,at= 1:12+.15,ylim=c(-3,1),add=TRUE); abline(0,0,col=1,lty=2,lwd=1); legend('bottomleft', inset=.02,c('CFSv2','ECHAM4.5'), fill=c('blue','red'), horiz=TRUE, cex=0.8);"
+
+    # rpss="$rpss  main='Site #"$site" ("$sitename")\nRPSS - ($L month lead time)',xlab='Month',ylab='RPSS', las=2, names=c('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'));abline(0,0,col=2,lty=2,lwd=1);";
+
+
+
+    # xaxt="n",
+    # col="#0000ff08",
+    # border=c("blue") ,
+    # boxwex=0.2,
+    # at= 1:12-.15,
+    # ylim=c(-3,1)
+
+
+    # done;
+
     echo;echo $rpss;echo;
-    Rscript -e "$rpss;dev.off();" >/dev/null 2>/dev/null;
+
+    Rscript -e "$rpss; dev.off();" >/dev/null 2>/dev/null;
 
   done;
 

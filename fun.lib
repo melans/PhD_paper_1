@@ -1,7 +1,7 @@
 # unset count site sites parameter parameters startDT endDT Sites Ls Ms;
 unset count;unset site;unset sites;unset parameter;unset parameters;unset startDT;unset endDT;unset Sites;unset Ls;unset Ms;
 declare -A parameter sites;
-site="08151500";
+# site="08151500";
 
 
 
@@ -9,8 +9,30 @@ site="08151500";
 ################################################################################
 # Configurations
 ################################################################################
+
+sites["08194500"]="29/27,-100/-98"; # Nueces Rv nr Tilden
+# sites["08194500"]="28.7/27.4,-100/-98"; # Nueces Rv nr Tilden
+      # https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=08194500
+      # USGS	08194500	Nueces Rv nr Tilden, TX	ST	28.30888906	-98.5572384	F	NAD83	 183.50	 .1	NGVD29	12110105
+
+sites["08080500"]="34/32,-103/-99"; # DMF Brazos Rv nr Aspermont
+# sites["08080500"]="34/32,-103/-99"; # DMF Brazos Rv nr Aspermont
+      # https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=08194500
+      # USGS	08194500	Nueces Rv nr Tilden, TX	ST	28.30888906	-98.5572384	F	NAD83	 183.50	 .1	NGVD29	12110105
+
+sites["08151500"]="31.5/29.5,-100.5/-98";  # Llano Rv at Llano
+# sites["08151500"]="31/29,-100/-98";  # Llano Rv at Llano
+      # https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=08151500
+      # USGS	08151500	Llano Rv at Llano, TX	ST	30.7512899	-98.6697599	F	NAD83	 970.01	 .1	NGVD29	12090204
+
+sites["08085500"]="34/32,-100/-98"; # Clear Fk Brazos Rv at Ft Griffin
+# sites["08085500"]="34/32,-100/-98"; # Clear Fk Brazos Rv at Ft Griffin
+      # https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=08194500
+      # USGS	08194500	Nueces Rv nr Tilden, TX	ST	28.30888906	-98.5572384	F	NAD83	 183.50	 .1	NGVD29	12110105
+
+
 # sites["site no"]="Y/Y,X/X";
-sites["08151500"]="31.1/29.8,-99.9/-98.3"; # Llano
+# sites["08151500"]="31.1/29.8,-99.9/-98.3"; # Llano
 # sites["09498500"]="35/32,-113/-109";
 # sites["05420500"]="44/37,-93/-87";
 #
