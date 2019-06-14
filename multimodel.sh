@@ -21,6 +21,10 @@ ll Sites/data/*.all
 
 
 
+# git filter-branch --force --index-filter 'git rm -r --cached --ignore-unmatch cfsv2/newdata*' --prune-empty --tag-name-filter cat -- --all
+# 76.6632.190612.133507 Elansary@hpcc2 ~/phd/paper_1 $ ll cfsv2/
+# total 104496
+# -rw-rw-r-- 1 Elansary Elansary      212 May 11 16:51 newdata.sh
 
 
 
