@@ -10,7 +10,20 @@ for x in 08080500 08085500 08151500 08194500;do
   done;
   cat Sites/data/$x.?.data > Sites/data/$x.all;
 done;
+
+
 ll Sites/data/*.all
+
+
+
+
+
+
+
+
+
+
+
 
 
 
