@@ -33,9 +33,9 @@ multimodel=read.csv(multimodel_data, row.names=NULL);
 pdf(corr);
 par(mfrow=c(3,2),mar=c(2.5,2.5,1.5,1.5));
 plot.new();
-# legend(x=0,y=.4,title="Spearman Rank Correlation",c("Cross Validation","95% Confedence Level"),pch=c(4,NA),lty=c(5,1),col=c(2,"gray44"));
-# legend(x=0,y=.4,title="Spearman Rank Correlation",c("CFSv2","ECHAM4p5","95% Confedence Level"),pch=c(1,4,NA),lty=c(3,5,1),col=c("blue","red","gray44"));
-legend(x=0,y=.4,title="Spearman Rank Correlation",c(models_names,"95% Confedence Level"),pch=c(models_pch,NA),lty=c(models_lty,1),col=c(models_col,"gray44"));
+# legend(x=0,y=.6,title="Spearman Rank Correlation",c("Cross Validation","95% Confedence Level"),pch=c(4,NA),lty=c(5,1),col=c(2,"gray44"));
+# legend(x=0,y=.6,title="Spearman Rank Correlation",c("CFSv2","ECHAM4p5","95% Confedence Level"),pch=c(1,4,NA),lty=c(3,5,1),col=c("blue","red","gray44"));
+legend(x=0,y=.6,title="Spearman Rank Correlation",c(models_names,"95% Confedence Level"),pch=c(models_pch,NA),lty=c(models_lty,1),col=c(models_col,"gray44"));
 for(l in 0:Ls){
   plot(x=NULL,,xlim=c(1,12),ylim=c(0,1),type="n",xaxt="s",xlab="Month",ylab="",mgp=c(-1,1,0), yaxs = "i");
   title(paste(l," months ahead"),line=-1);
@@ -62,9 +62,9 @@ dev.off();
 pdf(msss);
 par(mfrow=c(3,2),mar=c(2.5,2.5,1.5,1.5));
 plot.new();
-# legend(x=0,y=.4,title="Mean Square Skill Score",c("Cross Validation"),pch=c(4,16),lty=c(5,3),col=c(2,4));
-legend(x=0,y=.4,title="Mean Square Skill Score",c(models_names),pch=c(models_pch),lty=c(models_lty),col=c(models_col));
-# legend(x=0,y=.4,title="Mean Square Skill Score",c(models_names,"95% Confedence Level"),pch=c(models_pch),lty=c(models_lty),col=c(models_col));
+# legend(x=0,y=.6,title="Mean Square Skill Score",c("Cross Validation"),pch=c(4,16),lty=c(5,3),col=c(2,4));
+legend(x=0,y=.6,title="Mean Square Skill Score",c(models_names),pch=c(models_pch),lty=c(models_lty),col=c(models_col));
+# legend(x=0,y=.6,title="Mean Square Skill Score",c(models_names,"95% Confedence Level"),pch=c(models_pch),lty=c(models_lty),col=c(models_col));
 for(l in 0:Ls){
   plot(x=NULL,,xlim=c(1,12),ylim=c(0,1),type="n",xaxt="s",xlab="Month",ylab="",mgp=c(-1,1,0), yaxs = "i");
   title(paste(l," months ahead"),line=-1);
@@ -88,7 +88,7 @@ dev.off();
 pdf(corr_ey);
 par(mfrow=c(3,2),mar=c(2.5,2.5,1.5,1.5));
 plot.new();
-legend(x=0,y=.4,title="Spearman Rank Correlation (ENSO Yes)",c(models_names,"95% Confedence Level"),pch=c(models_pch,NA),lty=c(models_lty,1),col=c(models_col,"gray44"));
+legend(x=0,y=.6,title="Spearman Rank Correlation (ENSO Yes)",c(models_names,"95% Confedence Level"),pch=c(models_pch,NA),lty=c(models_lty,1),col=c(models_col,"gray44"));
 for(l in 0:Ls){
   plot(x=NULL,,xlim=c(1,12),ylim=c(0,1),type="n",xaxt="s",xlab="Month",ylab="",mgp=c(-1,1,0), yaxs = "i");
   title(paste(l," months ahead"),line=-1);
@@ -121,8 +121,8 @@ dev.off();
 pdf(msss_ey);
 par(mfrow=c(3,2),mar=c(2.5,2.5,1.5,1.5));
 plot.new();
-# legend(x=0,y=.4,title="Mean Square Skill Score (ENSO Yes)",c("Cross Validation"),pch=c(4,16),lty=c(5,3),col=c(2,4));
-legend(x=0,y=.4,title="Mean Square Skill Score (ENSO Yes)",c(models_names),pch=c(models_pch),lty=c(models_lty),col=c(models_col));
+# legend(x=0,y=.6,title="Mean Square Skill Score (ENSO Yes)",c("Cross Validation"),pch=c(4,16),lty=c(5,3),col=c(2,4));
+legend(x=0,y=.6,title="Mean Square Skill Score (ENSO Yes)",c(models_names),pch=c(models_pch),lty=c(models_lty),col=c(models_col));
 for(l in 0:Ls){
   plot(x=NULL,,xlim=c(1,12),ylim=c(0,1),type="n",xaxt="s",xlab="Month",ylab="",mgp=c(-1,1,0), yaxs = "i");
   title(paste(l," months ahead"),line=-1);
@@ -145,7 +145,7 @@ dev.off();
 pdf(corr_en);
 par(mfrow=c(3,2),mar=c(2.5,2.5,1.5,1.5));
 plot.new();
-legend(x=0,y=.4,title="Spearman Rank Correlation (ENSO No)",c(models_names,"95% Confedence Level"),pch=c(models_pch,NA),lty=c(models_lty,1),col=c(models_col,"gray44"));
+legend(x=0,y=.6,title="Spearman Rank Correlation (ENSO No)",c(models_names,"95% Confedence Level"),pch=c(models_pch,NA),lty=c(models_lty,1),col=c(models_col,"gray44"));
 for(l in 0:Ls){
   plot(x=NULL,,xlim=c(1,12),ylim=c(0,1),type="n",xaxt="s",xlab="Month",ylab="",mgp=c(-1,1,0), yaxs = "i");
   title(paste(l," months ahead"),line=-1);
@@ -178,8 +178,8 @@ dev.off();
 pdf(msss_en);
 par(mfrow=c(3,2),mar=c(2.5,2.5,1.5,1.5));
 plot.new();
-# legend(x=0,y=.4,title="Mean Square Skill Score (ENSO Yes)",c("Cross Validation"),pch=c(4,16),lty=c(5,3),col=c(2,4));
-legend(x=0,y=.4,title="Mean Square Skill Score (ENSO no)",c(models_names),pch=c(models_pch),lty=c(models_lty),col=c(models_col));
+# legend(x=0,y=.6,title="Mean Square Skill Score (ENSO Yes)",c("Cross Validation"),pch=c(4,16),lty=c(5,3),col=c(2,4));
+legend(x=0,y=.6,title="Mean Square Skill Score (ENSO no)",c(models_names),pch=c(models_pch),lty=c(models_lty),col=c(models_col));
 for(l in 0:Ls){
   plot(x=NULL,,xlim=c(1,12),ylim=c(0,1),type="n",xaxt="s",xlab="Month",ylab="",mgp=c(-1,1,0), yaxs = "i");
   title(paste(l," months ahead"),line=-1);
