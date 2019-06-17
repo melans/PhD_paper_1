@@ -19,7 +19,7 @@ init;
 enso;
 for site in "${!sites[@]}"; do
   initsite;
-  download;
+  # download;
   # fix_outliers;
   # verify;
   # if [[ $verified == 1 ]]; then

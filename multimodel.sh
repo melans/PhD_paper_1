@@ -1,7 +1,9 @@
 for f in {cfsv2,echam4p5}/Sites/*/0_temp/flow.1;do awk '$1>=1982&&$1<=2016' $f > Sites/data/$(sed 's/^.*\/Sites\///g; s/\/.*$//g' <<<$f).obs;done
 epsilon=.0001;
 rm Sites/data/*.data;
-for f in {cfsv2,echam4p5}/Sites/*/3_forecast/CV/CV.*;do awk 'NR>6{split(FILENAME,f,"/");split(f[6],x,".");print $1,x[2],exp($2)-'"$epsilon"' >>"Sites/data/"f[1]"."f[3]"."x[3]".data"}' $f;done
+for f in {cfsv2,echam4p5}/Sites/*/3_forecast/CV/CV.*;do awk 'NR>6{split(FILENAME,f,"/");split(f[6],x,".");print $1,x[2],exp($2) >>"Sites/data/"f[1]"."f[3]"."x[3]".data"}' $f;done
+
+# for f in {cfsv2,echam4p5}/Sites/*/3_forecast/CV/CV.*;do awk 'BEGIN{split(FILENAME,f,"/");split(f[6],x,".");print "Year Month Q">"Sites/data/"f[1]"."f[3]"."x[3]".data"}NR>6{print $1,x[2],exp($2)-'"$epsilon"' >>"Sites/data/"f[1]"."f[3]"."x[3]".data"}' $f;done
 
 for x in 08080500 08085500 08151500 08194500;do
   for l in 1 2 3 4;do
@@ -12,7 +14,7 @@ for x in 08080500 08085500 08151500 08194500;do
 done;
 
 
-ll Sites/data/*.all
+# ll Sites/data/*.all
 
 
 
